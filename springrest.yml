@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-deployment
+  namespace: mani
+  labels:
+    app: springboot
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: springboot
+  template:
+    metadata:
+      labels:
+        app: springboot
+    spec:
+      containers:
+      - name: springbootapp
+        image: image_to_be_deployed
+        ports:
+        - containerPort: 80
+---
+# Node Port Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: springbootservice
+  labels:
+    app: springboot
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+  selector:
+    name: springboot
+---
+# Mongo host path rc
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  labels:
+    app: springboot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springboot
+  template:
+    metadata:
+      labels:
+        app: springboot
+    spec:
+      containers:
+      - name: mongoapp
+        image: mongo
+        ports:
+        - containerPort: 27017
+---
+# Mongo Node Port RC
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongoservice
+  labels:
+    name: springboot
+spec:
+  type: ClusterIP
+  ports:
+    - port: 27017
+      targetPort: 27017
+  selector:
+    name: springboot
